@@ -39,6 +39,7 @@
 #import "BUYError.h"
 #import "BUYCollection.h"
 #import "BUYCollection+Additions.h"
+#import "BUYSmartCollection.h"
 
 #if __has_include(<PassKit/PassKit.h>)
 @import PassKit;
@@ -62,8 +63,13 @@ NSString * const BUYVersionString = @"1.2";
 @property (nonatomic, strong) NSString *apiKey;
 @property (nonatomic, strong) NSString *channelId;
 
+@property (nonatomic, strong) NSString *appKey;
+@property (nonatomic, strong) NSString *appPassword;
+
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) NSString *merchantId;
+
+@property (nonatomic, strong) NSString *apiDomain;
 
 @end
 
@@ -71,7 +77,9 @@ NSString * const BUYVersionString = @"1.2";
 
 - (instancetype)init { return nil; }
 
-- (instancetype)initWithShopDomain:(NSString *)shopDomain apiKey:(NSString *)apiKey channelId:(NSString *)channelId
+- (instancetype)initWithShopDomain:(NSString *)shopDomain
+                            apiKey:(NSString *)apiKey
+                         channelId:(NSString *)channelId
 {
 	if (shopDomain.length == 0) {
 		NSException *exception = [NSException exceptionWithName:@"Bad shop domain" reason:@"Please ensure you initialize with a shop domain" userInfo:nil];
@@ -95,6 +103,21 @@ NSString * const BUYVersionString = @"1.2";
 		self.pageSize = 25;
 	}
 	return self;
+}
+
+- (instancetype)initWithShopDomain:(NSString *)shopDomain
+                            apiKey:(NSString *)apiKey
+                         channelId:(NSString *)channelId
+                             appKey:(NSString*)appKey
+                       appPassword:(NSString*)appPassword
+{
+    self = [self initWithShopDomain:shopDomain apiKey:apiKey channelId:channelId];
+    if (self) {
+        self.appKey = appKey;
+        self.appPassword = appPassword;
+        self.apiDomain = [NSString stringWithFormat:@"https://%@:%@@%@/admin", self.appKey, self.appPassword, self.shopDomain];
+    }
+    return self;
 }
 
 #pragma mark - Storefront
@@ -124,7 +147,7 @@ NSString * const BUYVersionString = @"1.2";
 
 - (NSURLSessionDataTask *)getProductsPage:(NSUInteger)page completion:(BUYDataProductListBlock)block
 {
-	NSString *url = [NSString stringWithFormat:@"https://%@/api/channels/%@/product_publications.json?limit=%lu&page=%lu", self.shopDomain, self.channelId,  (unsigned long)self.pageSize, (unsigned long)page];
+	NSString *url = [NSString stringWithFormat:@"%@/product_publications.json?limit=%lu&page=%lu", self.shopDomain, self.channelId,  (unsigned long)self.pageSize, (unsigned long)page];
 	
 	return [self getRequestForURL:url completionHandler:^(NSDictionary *json, NSURLResponse *response, NSError *error) {
 		
@@ -211,6 +234,109 @@ NSString * const BUYVersionString = @"1.2";
 	
 	return task;
 }
+
+#pragma mark - Products
+
+- (NSURLSessionDataTask *)getProductsWithTitle:(NSString*)title
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block
+{
+    NSString *url = [NSString stringWithFormat:@"%@/products.json?title=%@", self.apiDomain, title];
+    
+    return [self getRequestForURL:url completionHandler:^(NSDictionary *json, NSURLResponse *response, NSError *error) {
+        
+        NSArray *products = nil;
+        if (json && error == nil) {
+            products = [BUYProduct convertJSONArray:json[@"products"]];
+        }
+        block(products, page, [self hasReachedEndOfPage:products] || error, error);
+    }];
+}
+
+- (NSURLSessionDataTask *)getProductsForType:(NSString*)type
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block
+{
+    NSString *url = [NSString stringWithFormat:@"%@/products.json?type=%@", self.apiDomain, type];
+    
+    return [self getRequestForURL:url completionHandler:^(NSDictionary *json, NSURLResponse *response, NSError *error) {
+        
+        NSArray *products = nil;
+        if (json && error == nil) {
+            products = [BUYProduct convertJSONArray:json[@"products"]];
+        }
+        block(products, page, [self hasReachedEndOfPage:products] || error, error);
+    }];
+}
+
+- (NSURLSessionDataTask *)getProductsWithTitle:(NSString*)title
+                                       type:(NSString*)type
+                                        page:(NSUInteger)page
+                                  completion:(BUYDataProductListBlock)block
+{
+    NSString *url = [NSString stringWithFormat:@"%@/products.json?title=%@&type=%@", self.apiDomain, title, type];
+    
+    return [self getRequestForURL:url completionHandler:^(NSDictionary *json, NSURLResponse *response, NSError *error) {
+        
+        NSArray *products = nil;
+        if (json && error == nil) {
+            products = [BUYProduct convertJSONArray:json[@"products"]];
+        }
+        block(products, page, [self hasReachedEndOfPage:products] || error, error);
+    }];
+}
+
+- (NSURLSessionDataTask *)getProductsForVendor:(NSString*)vendor
+                                          type:(NSString*)type
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block
+{
+    NSString *url = [NSString stringWithFormat:@"%@/products.json?vendor=%@&product_type=%@", self.apiDomain, vendor, type];
+    
+    return [self getRequestForURL:url completionHandler:^(NSDictionary *json, NSURLResponse *response, NSError *error) {
+        
+        NSArray *products = nil;
+        if (json && error == nil) {
+            products = [BUYProduct convertJSONArray:json[@"products"]];
+        }
+        block(products, page, [self hasReachedEndOfPage:products] || error, error);
+    }];
+}
+
+- (NSURLSessionDataTask *)getProductsForVendor:(NSString*)vendor
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block
+{
+    NSString *url = [NSString stringWithFormat:@"%@/products.json?vendor=%@&title=test", self.apiDomain, vendor];
+    
+    return [self getRequestForURL:url completionHandler:^(NSDictionary *json, NSURLResponse *response, NSError *error) {
+        
+        NSArray *products = nil;
+        if (json && error == nil) {
+            products = [BUYProduct convertJSONArray:json[@"products"]];
+        }
+        block(products, page, [self hasReachedEndOfPage:products] || error, error);
+    }];
+}
+
+#pragma mark - Collections
+
+- (NSURLSessionDataTask *)getCollectionsWithTitle:(NSString*)title
+                                             page:(NSUInteger)page
+                                       completion:(BUYDataSmartCollectionListBlock)block
+{
+    NSString *url = [NSString stringWithFormat:@"%@/smart_collections.json?title=%@", self.apiDomain, title];
+    
+    return [self getRequestForURL:url completionHandler:^(NSDictionary *json, NSURLResponse *response, NSError *error) {
+        
+        NSArray *collections = nil;
+        if (json && error == nil) {
+            collections = [BUYSmartCollection convertJSONArray:json[@"smart_collections"]];
+        }
+        block(collections, page, [self hasReachedEndOfPage:collections] || error, error);
+    }];
+}
+
 
 #pragma mark - Helpers
 

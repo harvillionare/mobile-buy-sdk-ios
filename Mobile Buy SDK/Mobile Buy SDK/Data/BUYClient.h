@@ -37,6 +37,7 @@
 @class BUYProductVariant;
 @class BUYShop;
 @class BUYCollection;
+@class BUYSmartCollection;
 
 /**
  *  The sort order for products in a collection
@@ -176,6 +177,16 @@ typedef void (^BUYDataProductsBlock)(NSArray *products, NSError *error);
 typedef void (^BUYDataCollectionsBlock)(NSArray *collections, NSError *error);
 
 /**
+ *  Return block containing a list of BUYSmartProduct objects, the page requested, a boolean to determine whether the end of the list has been reach and/or an optional NSError
+ *
+ *  @param products   An array of BUYSmartCollection objects
+ *  @param page       Index of the page requested
+ *  @param reachedEnd Boolean indicating whether additional pages exist
+ *  @param error      An optional NSError
+ */
+typedef void (^BUYDataSmartCollectionListBlock)(NSArray *collections, NSUInteger page, BOOL reachedEnd, NSError *error);
+
+/**
  *  Return block containing a list of BUYProduct objects, the page requested, a boolean to determine whether the end of the list has been reach and/or an optional NSError
  *
  *  @param products   An array of BUYProduct objects
@@ -220,6 +231,12 @@ typedef void (^BUYDataGiftCardBlock)(BUYGiftCard *giftCard, NSError *error);
  *  @return An instance of BUYDataClient
  */
 - (instancetype)initWithShopDomain:(NSString *)shopDomain apiKey:(NSString *)apiKey channelId:(NSString *)channelId NS_DESIGNATED_INITIALIZER;
+
+- (instancetype)initWithShopDomain:(NSString *)shopDomain
+                            apiKey:(NSString *)apiKey
+                         channelId:(NSString *)channelId
+                            appKey:(NSString*)appKey
+                       appPassword:(NSString*)appPassword;
 
 /**
  *  Queue where callbacks will be called
@@ -284,6 +301,8 @@ typedef void (^BUYDataGiftCardBlock)(BUYGiftCard *giftCard, NSError *error);
  */
 - (NSURLSessionDataTask *)getProductsPage:(NSUInteger)page completion:(BUYDataProductListBlock)block;
 
+- (NSURLSessionDataTask *)getProducts:(NSUInteger)page completion:(BUYDataProductListBlock)block;
+
 /**
  *  Fetches a single product by the ID of the product.
  *
@@ -336,6 +355,36 @@ typedef void (^BUYDataGiftCardBlock)(BUYGiftCard *giftCard, NSError *error);
  *  @return the associated NSURLSessionDataTask
  */
 - (NSURLSessionDataTask *)getProductsPage:(NSUInteger)page inCollection:(NSNumber *)collectionId sortOrder:(BUYCollectionSort)sortOrder completion:(BUYDataProductListBlock)block;
+
+#pragma mark - Products
+
+- (NSURLSessionDataTask *)getProductsWithTitle:(NSString*)title
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block;
+
+- (NSURLSessionDataTask *)getProductsForType:(NSString*)type
+                                         page:(NSUInteger)page
+                                  completion:(BUYDataProductListBlock)block;
+
+- (NSURLSessionDataTask *)getProductsWithTitle:(NSString*)title
+                                          type:(NSString*)type
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block;
+
+- (NSURLSessionDataTask *)getProductsForVendor:(NSString*)vendor
+                                          type:(NSString*)type
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block;
+
+- (NSURLSessionDataTask *)getProductsForVendor:(NSString*)vendor
+                                          page:(NSUInteger)page
+                                    completion:(BUYDataProductListBlock)block;
+
+#pragma mark - Collections
+
+- (NSURLSessionDataTask *)getCollectionsWithTitle:(NSString*)title
+                                             page:(NSUInteger)page
+                                      completion:(BUYDataSmartCollectionListBlock)block;
 
 #pragma mark - Checkout
 
