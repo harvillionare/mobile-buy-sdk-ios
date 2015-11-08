@@ -24,7 +24,14 @@
 //  THE SOFTWARE.
 //
 
-<<<<<<< HEAD
+#import <UIKit/UIKit.h>
+
+//! Project version number for BuyDynamic.
+FOUNDATION_EXPORT double BuyDynamicVersionNumber;
+
+//! Project version string for BuyDynamic.
+FOUNDATION_EXPORT const unsigned char BuyDynamicVersionString[];
+
 #import <Buy/BUYAddress.h>
 #import <Buy/BUYCart.h>
 #import <Buy/BUYCheckout.h>
@@ -52,42 +59,5 @@
 #import <Buy/BUYTheme.h>
 #import <Buy/BUYCartLineItem.h>
 #import <Buy/BUYCollection.h>
-#import <Buy/BUYSmartCollection.h>
 #import <Buy/BUYMaskedCreditCard.h>
-#import <Buy/BuyError.h>
-#import <Buy/Buy-Bridging-Header.h>
-=======
-/**
- *  Umbrella header used for Cocoapods
- */
-
-#import "BUYApplePayAdditions.h"
-#import "BUYApplePayHelpers.h"
-#import "BUYAddress.h"
-#import "BUYCart.h"
-#import "BUYCartLineItem.h"
-#import "BUYCheckout.h"
-#import "BUYClient+Test.h"
-#import "BUYClient.h"
-#import "BUYCollection.h"
-#import "BUYCreditCard.h"
-#import "BUYDiscount.h"
-#import "BUYError.h"
-#import "BUYGiftCard.h"
-#import "BUYImage.h"
-#import "BUYLineItem.h"
-#import "BUYMaskedCreditCard.h"
-#import "BUYOption.h"
-#import "BUYOptionValue.h"
-#import "BUYOrder.h"
-#import "BUYPaymentButton.h"
-#import "BUYProduct.h"
-#import "BUYProductVariant.h"
-#import "BUYProductViewController.h"
-#import "BUYShippingRate.h"
-#import "BUYShop.h"
-#import "BUYStoreViewController.h"
-#import "BUYTaxLine.h"
-#import "BUYTheme.h"
-#import "BUYViewController.h"
->>>>>>> Shopify/master
+#import <Buy/BUYError.h>
